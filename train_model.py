@@ -17,9 +17,9 @@ def variable_length_collate(batch):
         return list(images), torch.tensor(labels, dtype=torch.float32)
 
 if __name__ == "__main__":
-    image_dir = "/data/home/cos557/jg0037/rothman/images"
-    csv_path = "/data/home/cos557/jg0037/rothman/parsed_xray_files_log.csv"
-    patient_info_path = "/data/home/cos557/jg0037/rothman/TAR_Sheet_fo_stats_SGP_7_9_24_output4.csv"
+    image_dir = "/data/home/cos557/data/rothman/images"
+    csv_path = "/data/home/cos557/data/rothman/parsed_xray_files_log.csv"
+    patient_info_path = "/data/home/cos557/data/rothman/TAR_Sheet_fo_stats_SGP_7_9_24_output4.csv"
     seed=56
 
     transform = transforms.Compose([

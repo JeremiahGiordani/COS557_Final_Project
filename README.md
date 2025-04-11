@@ -47,15 +47,7 @@ If you're working in a virtual environment (recommended), activate it first befo
 
 ### 2. **Evaluate a Pretrained Model**
 
-Open `eval_model.py` and update these lines to your dataset location:
-
-```python
-image_dir = "/your/path/to/images"
-csv_path = "/your/path/to/parsed_xray_files_log.csv"
-patient_info_path = "/your/path/to/patient_info.csv"
-```
-
-Then run:
+Run the following script:
 
 ```bash
 python eval_model.py
@@ -67,23 +59,15 @@ This will load a pretrained model and print evaluation metrics on the test set.
 
 ### 3. **Train a New Model**
 
-Open `train_model.py` and update the same path variables to match your data:
-
-```python
-image_dir = "/your/path/to/images"
-csv_path = "/your/path/to/parsed_xray_files_log.csv"
-patient_info_path = "/your/path/to/patient_info.csv"
-```
-
-You can also change the seed of the train/val/test split:
-```python
-seed = <some_integer>
-```
-
-Then run:
+Run:
 
 ```bash
 python train_model.py
+```
+
+Note that you can also open `train_model.py` and change the seed of the train/val/test split:
+```python
+seed = <some_integer>
 ```
 
 **Note**: The dataset is relatively small and highly imbalanced. If you modify the random seed to change the train/test/val split, you may unintentionally create significant class imbalance across splits. Do so cautiously.
