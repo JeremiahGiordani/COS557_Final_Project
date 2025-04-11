@@ -1,0 +1,13 @@
+Using device: cpu
+Metadata feature dimension: 5
+Train Set: Total=1347, Positives=88, Negatives=1259
+Val Set: Total=301, Positives=17, Negatives=284
+Test Set: Total=297, Positives=22, Negatives=275
+Dataset sizes: Train=1347, Val=301, Test=297
+Positive samples: 127
+Negative samples: 1818
+Inference Metrics:
+Accuracy:  0.9178
+F1 Score:  0.7456
+Precision: 0.8947
+Recall:    0.8474

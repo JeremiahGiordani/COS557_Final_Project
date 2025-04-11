@@ -161,6 +161,7 @@ class TARRevisionClassifier(nn.Module):
                     f"F1={val_f1:.4f}, Prec={val_precision:.4f}, Rec={val_recall:.4f}")
 
                 if val_precision >= best_val_precision:
+                    best_val_precision=val_precision
                     torch.save(self.state_dict(), model_path)
                     print(f"Model saved to {model_path}")
 

@@ -20,7 +20,7 @@ if __name__ == "__main__":
     image_dir = "/data/home/cos557/jg0037/rothman/images"
     csv_path = "/data/home/cos557/jg0037/rothman/parsed_xray_files_log.csv"
     patient_info_path = "/data/home/cos557/jg0037/rothman/TAR_Sheet_fo_stats_SGP_7_9_24_output4.csv"
-
+    seed=56
 
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -51,7 +51,6 @@ if __name__ == "__main__":
     # val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     # test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
 
-    seed=56
     train_set, val_set, test_set = full_dataset.split_by_patient(seed=seed)
     train_loader = DataLoader(train_set, batch_size=8, shuffle=True, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
@@ -72,7 +71,7 @@ if __name__ == "__main__":
     pos_weight = torch.tensor([neg / pos])
     criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight).to(device)
 
-    model_path = "model_with_patient_independence.pt"
+    model_path = "pretrained_models/pretrained_model.pt"
     model.fit(train_loader, val_loader, epochs=15, optimizer=optimizer, criterion=criterion, device=device, model_path=model_path)
 
     model.infer(test_loader, device=device)

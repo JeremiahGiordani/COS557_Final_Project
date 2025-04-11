@@ -9,7 +9,6 @@ from collections import defaultdict
 import random
 
 
-
 class TARXrayDataset(Dataset):
     def __init__(self, image_dir, csv_path, patient_info_path=None, transform=None):
         self.image_dir = image_dir
@@ -102,7 +101,7 @@ class TARXrayDataset(Dataset):
             mean = sum(values) / len(values)
             std = (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
             self.metadata_means[k] = mean
-            self.metadata_stds[k] = std if std > 0 else 1.0  # avoid division by zero
+            self.metadata_stds[k] = std if std > 0 else 1.0
 
     def _determine_label(self, pid, current_revision_status):
         revisions = sorted([rev for rev, _ in self.patient_revision_map[pid]])

@@ -71,7 +71,7 @@ if __name__ == "__main__":
     print(f"Positive samples: {pos}")
     print(f"Negative samples: {neg}")
 
-    model_path = "model_with_metadata.pt"
+    model_path = "pretrained_models/model_with_patient_independence.pt"
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
 

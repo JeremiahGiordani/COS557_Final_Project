@@ -1,1 +1,4 @@
+__pycache__/
+prior_implementations/*.pt
 env/
+run_logs/old/
