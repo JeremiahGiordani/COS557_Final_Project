@@ -3,12 +3,12 @@
 This repository contains code for predicting the likelihood of **Total Ankle Replacement (TAR) revision surgery** using patient X-rays and structured metadata.
 
 Contributors:
-Jeremiah Giordani
-Tess Marvin
-Isabel Armour-Garb
+- Jeremiah Giordani
+- Tess Marvin
+- Isabel Armour-Garb
 
 Principal Investigator:
-Prof Olga Troyanskaya
+- Prof Olga Troyanskaya
 
 ## Problem Overview
 
