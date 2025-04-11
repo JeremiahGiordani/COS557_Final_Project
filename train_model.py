@@ -42,20 +42,20 @@ if __name__ == "__main__":
     val_size = int(0.15 * total_size)
     test_size = total_size - train_size - val_size
 
-    seed = 42
-    generator = torch.Generator().manual_seed(seed)
+    # seed = 42
+    # generator = torch.Generator().manual_seed(seed)
 
-    train_set, val_set, test_set = random_split(full_dataset, [train_size, val_size, test_size], generator=generator)
+    # train_set, val_set, test_set = random_split(full_dataset, [train_size, val_size, test_size], generator=generator)
 
+    # train_loader = DataLoader(train_set, batch_size=8, shuffle=True, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
+    # val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
+    # test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
+
+    seed=56
+    train_set, val_set, test_set = full_dataset.split_by_patient(seed=seed)
     train_loader = DataLoader(train_set, batch_size=8, shuffle=True, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
-
-    # seed=56
-    # train_set, val_set, test_set = full_dataset.split_by_patient(seed=seed)
-    # train_loader = DataLoader(train_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
-    # val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
-    # test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     print(f"Dataset sizes: Train={len(train_set)}, Val={len(val_set)}, Test={len(test_set)}")
 
     model = TARRevisionClassifier(
