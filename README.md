@@ -53,7 +53,13 @@ Run the following script:
 python eval_model.py
 ```
 
-This will load a pretrained model and print evaluation metrics on the test set.
+To direct output into a logfile, run:
+
+```bash
+python eval_model.py > eval_output.log 2>&1
+```
+
+This will load a pretrained model and print/log evaluation metrics on the test set.
 
 ---
 
@@ -63,6 +69,12 @@ Run:
 
 ```bash
 python train_model.py
+```
+
+To direct output into a logfile, run:
+
+```bash
+python train_model.py > train_output.log 2>&1
 ```
 
 Note that you can also open `train_model.py` and change the seed of the train/val/test split:
