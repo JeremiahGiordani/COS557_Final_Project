@@ -89,18 +89,4 @@ seed = <some_integer>
 
 **Note**: The dataset is relatively small and highly imbalanced. If you modify the random seed to change the train/test/val split, you may unintentionally create significant class imbalance across splits. Do so cautiously.
 
----
-
-## Results
-
-You can check previous model training and evaluation logs in the `run_logs/` directory:
-
-- **Training Logs**:
-  - `run_logs/15_iterations_training.log`
-  - `run_logs/15_iterations_training_replicated.log`
-
-- **Evaluation Logs**:
-  - `run_logs/eval.log`
-  - `run_logs/eval_replicated.log`
-
 These logs include final evaluation metrics like accuracy, F1 score, and precision-recall statistics.
