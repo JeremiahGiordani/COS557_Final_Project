@@ -4,6 +4,11 @@ This repository contains code for predicting the likelihood of **Total Ankle Rep
 
 Contributors:
 - Jeremiah Giordani
+- Gia Musslewhite
+- Braiden Aaronson
+- Alex Borengasser
+
+TAs:
 - Tess Marvin
 - Isabel Armour-Garb
 
