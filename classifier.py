@@ -200,3 +200,47 @@ class TARRevisionClassifier(nn.Module):
         print(f"Precision: {np.mean(running_precision):.4f}")
         print(f"Recall:    {np.mean(running_recall):.4f}")
 
+    def get_predictions(self, dataloader, device='cpu', return_outputs=True):
+        self.eval()
+        self.to(device)
+
+        running_acc, running_f1, running_precision, running_recall = [], [], [], []
+        all_logits = []
+        all_labels = []
+
+        with torch.no_grad():
+            for x_batch, y_batch, metadata_batch in dataloader:
+                batch_tensors = [imgs.to(device) for imgs in x_batch]
+                padded_batch = torch.nn.utils.rnn.pad_sequence(batch_tensors, batch_first=True)
+                metadata_batch = metadata_batch.to(device) if metadata_batch is not None else None
+                y_batch = y_batch.to(device)
+
+                outputs = self(padded_batch, metadata_batch)
+                probs = torch.sigmoid(outputs)
+                preds = (probs > 0.5).float()
+
+                acc = accuracy_score(y_batch.cpu(), preds.cpu())
+                f1 = f1_score(y_batch.cpu(), preds.cpu(), zero_division=1)
+                precision = precision_score(y_batch.cpu(), preds.cpu(), zero_division=1)
+                recall = recall_score(y_batch.cpu(), preds.cpu(), zero_division=1)
+
+                running_acc.append(acc)
+                running_f1.append(f1)
+                running_precision.append(precision)
+                running_recall.append(recall)
+
+                if return_outputs:
+                    all_logits.append(outputs.cpu())
+                    all_labels.append(y_batch.cpu())
+
+                del outputs, probs, preds, batch_tensors, padded_batch, metadata_batch, y_batch
+                gc.collect()
+
+        print(f"Inference Metrics:")
+        print(f"Accuracy:  {np.mean(running_acc):.4f}")
+        print(f"F1 Score:  {np.mean(running_f1):.4f}")
+        print(f"Precision: {np.mean(running_precision):.4f}")
+        print(f"Recall:    {np.mean(running_recall):.4f}")
+
+        if return_outputs:
+            return torch.cat(all_logits), torch.cat(all_labels)
