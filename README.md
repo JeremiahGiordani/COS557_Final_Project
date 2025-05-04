@@ -90,3 +90,43 @@ seed = <some_integer>
 **Note**: The dataset is relatively small and highly imbalanced. If you modify the random seed to change the train/test/val split, you may unintentionally create significant class imbalance across splits. Do so cautiously.
 
 These logs include final evaluation metrics like accuracy, F1 score, and precision-recall statistics.
+
+### Extensions (optional)
+When training a new model using train_model.py, several optional command-line arguments are available to customize training behavior.
+
+If you run the script without any arguments:
+
+```bash
+python train_model.py
+```
+you’ll get the default settings:
+
+- Data split by patient (--split=by-patient)
+- Binary cross-entropy loss (--loss=bce)
+- No image augmentation
+
+You can customize training with the following options:
+
+Choose how the dataset is split:
+`--split`
+
+- by-patient (default): Ensures that no patient appears in more than one dataset split (train/val/test). This is highly recommended when using metadata to prevent information leakage.
+- random: Randomly splits datapoints, which may include multiple appointments from the same patient across different splits.
+
+Specify the loss function:
+`--loss`
+
+- bce (default): Standard binary cross-entropy with class weighting for imbalance.
+- focal: Focal loss, which emphasizes harder-to-classify examples and may help in highly imbalanced settings.
+
+Enable data augmentation:
+`--augment`
+
+- If specified, each datapoint (i.e., appointment) is duplicated with 7 different image transformations (e.g., flipping, rotation, inversion). This significantly increases dataset size and may improve generalization.
+
+Example usage:
+
+```bash
+python train_model.py --split=by-patient --loss=focal --augment
+```
+This will train the model using a patient-independent split, focal loss, and augmented training data.

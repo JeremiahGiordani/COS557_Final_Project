@@ -1,4 +1,6 @@
 import torch
+
+import argparse
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from sklearn.metrics import roc_auc_score, accuracy_score, f1_score
@@ -6,6 +8,8 @@ import numpy as np
 
 from dataset import TARXrayDataset
 from classifier import TARRevisionClassifier
+
+from extensions.focal_loss import FocalLoss
 
 def variable_length_collate(batch):
     if len(batch[0]) == 3:  # if metadata is included
@@ -16,11 +20,33 @@ def variable_length_collate(batch):
         images, labels = zip(*batch)
         return list(images), torch.tensor(labels, dtype=torch.float32)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train TAR Revision Classifier")
+    parser.add_argument(
+        "--split",
+        type=str,
+        choices=["by-patient", "random"],
+        default="by-patient",
+        help="Type of split to use: 'by-patient' or 'random'"
+    )
+    parser.add_argument(
+        "--loss",
+        type=str,
+        choices=["bce", "focal"],
+        default="bce",
+        help="Loss function to use: 'bce' or 'focal'"
+    )
+    parser.add_argument("--augment", action="store_true", help="Enable image augmentation")
+
+    return parser.parse_args()
+
 if __name__ == "__main__":
     image_dir = "/data/home/cos557/data/rothman/images"
     csv_path = "/data/home/cos557/data/rothman/parsed_xray_files_log.csv"
     patient_info_path = "/data/home/cos557/data/rothman/TAR_Sheet_fo_stats_SGP_7_9_24_output4.csv"
     seed=56
+
+    args = parse_args()
 
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -30,7 +56,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    full_dataset = TARXrayDataset(image_dir=image_dir, csv_path=csv_path, transform=transform, patient_info_path=patient_info_path)
+    full_dataset = TARXrayDataset(image_dir=image_dir, csv_path=csv_path, transform=transform, patient_info_path=patient_info_path, augment=args.augment)
 
     _, _, sample_metadata = full_dataset[0]
     metadata_dim = sample_metadata.shape[0]
@@ -42,16 +68,15 @@ if __name__ == "__main__":
     val_size = int(0.15 * total_size)
     test_size = total_size - train_size - val_size
 
-    # seed = 42
-    # generator = torch.Generator().manual_seed(seed)
+    if args.split == 'random':
+        seed = 42
+        generator = torch.Generator().manual_seed(seed)
+        train_set, val_set, test_set = random_split(full_dataset, [train_size, val_size, test_size], generator=generator)
 
-    # train_set, val_set, test_set = random_split(full_dataset, [train_size, val_size, test_size], generator=generator)
+    if args.split == 'by-patient':
+        train_set, val_set, test_set = full_dataset.split_by_patient(seed=seed)
 
-    # train_loader = DataLoader(train_set, batch_size=8, shuffle=True, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
-    # val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
-    # test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
 
-    train_set, val_set, test_set = full_dataset.split_by_patient(seed=seed)
     train_loader = DataLoader(train_set, batch_size=8, shuffle=True, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     val_loader = DataLoader(val_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
     test_loader = DataLoader(test_set, batch_size=8, collate_fn=variable_length_collate, num_workers=1, pin_memory=False)
@@ -69,7 +94,11 @@ if __name__ == "__main__":
     print(f"Negative samples: {neg}")
 
     pos_weight = torch.tensor([neg / pos])
-    criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight).to(device)
+    if args.loss == "bce":
+        criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight).to(device)
+    elif args.loss == "focal":
+        criterion = FocalLoss(alpha=1.0, gamma=2.0, pos_weight=pos_weight).to(device)
+    
 
     model_path = "pretrained_models/pretrained_model.pt"
     model.fit(train_loader, val_loader, epochs=15, optimizer=optimizer, criterion=criterion, device=device, model_path=model_path)

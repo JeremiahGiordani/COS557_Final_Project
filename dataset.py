@@ -7,15 +7,27 @@ import pandas as pd
 from torchvision import transforms
 from collections import defaultdict
 import random
+from torchvision.transforms import functional as TF
 
+AUGMENTATIONS = [
+    ("original", lambda x: x),
+    ("hflip", TF.hflip),
+    ("vflip", TF.vflip),
+    ("invert", TF.invert),
+    ("rot90", lambda x: TF.rotate(x, 90)),
+    ("rot180", lambda x: TF.rotate(x, 180)),
+    ("rot270", lambda x: TF.rotate(x, 270)),
+]
 
 class TARXrayDataset(Dataset):
-    def __init__(self, image_dir, csv_path, patient_info_path=None, transform=None):
+    def __init__(self, image_dir, csv_path, patient_info_path=None, transform=None, augment=False):
         self.image_dir = image_dir
         self.transform = transform
         self.csv_data = pd.read_csv(csv_path)
         self.patient_info_path=patient_info_path
         self.patient_info = pd.read_csv(patient_info_path) if patient_info_path else None
+
+        self.augment = augment
 
         self.metadata_keys = [
             "Age",
@@ -29,6 +41,8 @@ class TARXrayDataset(Dataset):
 
         self.patient_revision_map = self._build_revision_map()
         self.data_points = self._collect_image_sets()
+        if self.augment:
+            self.data_points = self._augment_data_points(self.data_points)
         self._compute_normalization_stats()
 
     def _build_revision_map(self):
@@ -113,8 +127,11 @@ class TARXrayDataset(Dataset):
     def __getitem__(self, idx):
         entry = self.data_points[idx]
         image_tensors = []
+        transform_fn = entry.get("transform_fn", lambda x: x)
+
         for path in entry["image_paths"]:
             img = Image.open(path).convert("RGB")
+            img = transform_fn(img)
             if self.transform:
                 img = self.transform(img)
             image_tensors.append(img)
@@ -154,6 +171,20 @@ class TARXrayDataset(Dataset):
         pos = sum(1 for dp in self.data_points if dp["label"] == 1)
         neg = sum(1 for dp in self.data_points if dp["label"] == 0)
         return pos, neg
+
+    def _augment_data_points(self, data_points):
+        augmented = []
+        for dp in data_points:
+            for name, transform_fn in AUGMENTATIONS:
+                dp_copy = {
+                    "image_paths": dp["image_paths"],
+                    "label": dp["label"],
+                    "metadata": dp["metadata"],
+                    "transform_fn": transform_fn,
+                    "transform_name": name
+                }
+                augmented.append(dp_copy)
+        return augmented
 
     def split_by_patient(self, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, seed=42):
         pid_to_indices = defaultdict(list)
